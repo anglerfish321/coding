@@ -1,0 +1,489 @@
+speed boost from my menu
+Player.Instance.maxJumpSpeed = ModMenuPatch.speedMultiplier.Value;
+                    Player.Instance.jumpMultiplier = ModMenuPatch.jumpMultiplier.Value;
+                }
+                else
+                {
+                    Player.Instance.maxJumpSpeed = GTAGMenu.maxJumpSpeed.Value;
+                    Player.Instance.jumpMultiplier = 1.15f;
+__
+teleport to random player
+private static void TeleportToRandomPlayer()
+{
+    bool flag = !MenuPatch.foundPlayer;
+    if (flag)
+    {
+        Player[] playerList = PhotonNetwork.PlayerList;
+        System.Random random = new System.Random();
+        int num = random.Next(playerList.Length);
+        PhotonView photonView = GorillaGameManager.instance.FindVRRigForPlayer(playerList[num]);
+        bool flag2 = photonView != null;
+        if (flag2)
+        {
+            Player.Instance.transform.position = photonView.transform.position;
+            Player.Instance.GetComponent<Rigidbody>().velocity = new Vector3(0f, 0f, 0f);
+            MenuPatch.foundPlayer = true;
+        }
+    }
+}
+__
+duck spammer 
+
+private static void duck()
+{
+    foreach (Player player in PhotonNetwork.PlayerList)
+    {
+        PhotonView photonView = GorillaGameManager.instance.FindVRRigForPlayer(player);
+        if (photonView != null)
+        {
+            photonView.RPC("PlayHandTap", 0, new object[]
+            {
+                75,
+                true,
+                1f
+            });
+        }
+    }
+}
+___
+key spammer
+
+private static void keyspam()
+{
+    VRRig[] allVRRigs = MenuPatch.GetAllVRRigs();
+    for (int i = 0; i < allVRRigs.Length; i++)
+    {
+        allVRRigs[i].photonView.RPC("PlayHandTap", 0, new object[]
+        {
+            66,
+            false,
+            99999f
+        });
+    }
+}
+VibinFishy — 01/29/2023 2:55 PM
+__
+wasd movement (bwue)
+
+private static void Movement1()
+{
+    Player.Instance.leftHandTransform.position = Player.Instance.headCollider.transform.position;
+    Player.Instance.rightHandTransform.position = Player.Instance.headCollider.transform.position;
+    bool flag = false;
+    int num = 0;
+    float d;
+    float d2;
+    if (UnityInput.Current.GetKey(KeyCode.LeftShift))
+    {
+        d = 20f;
+        d2 = -20f;
+    }
+    else
+    {
+        d = 2f;
+        d2 = -2f;
+    }
+    if (UnityInput.Current.GetKey(KeyCode.Space))
+    {
+        flag = true;
+    }
+    if (UnityInput.Current.GetKey(KeyCode.W))
+    {
+        Player.Instance.transform.position += Player.Instance.bodyCollider.transform.forward * Time.deltaTime * d;
+    }
+    if (UnityInput.Current.GetKey(KeyCode.S))
+    {
+        Player.Instance.transform.position += Player.Instance.bodyCollider.transform.forward * Time.deltaTime * d2;
+    }
+    if (UnityInput.Current.GetKey(KeyCode.A))
+    {
+        Player.Instance.transform.Rotate(0f, -1f, 0f);
+    }
+    if (UnityInput.Current.GetKey(KeyCode.D))
+    {
+        Player.Instance.transform.Rotate(0f, 1f, 0f);
+    }
+    while (flag)
+    {
+        num++;
+        Player.Instance.GetComponent<Rigidbody>().AddForce(0f, 5f, 0f, ForceMode.Impulse);
+        flag = false;
+    }
+} 
+VibinFishy — 01/29/2023 3:57 PM
+__ create lobby
+bwue
+
+public static void CreatePublicRoom()
+{
+    Hashtable hashtable = new Hashtable();
+    hashtable.Add("gameMode", "forest" + GorillaComputer.instance.currentQueue + GorillaComputer.instance.currentGameMode);
+    Hashtable customRoomProperties = hashtable;
+    PhotonNetwork.CreateRoom("6FE2", new RoomOptions
+    {
+        IsVisible = true,
+        IsOpen = true,
+        MaxPlayers = 10,
+        CustomRoomProperties = customRoomProperties,
+        PublishUserId = true,
+        CustomRoomPropertiesForLobby = new string[]
+        {
+            "gameMode"
+        }
+    }, null, null);
+}
+VibinFishy — 01/29/2023 9:40 PM
+__ no clip
+bwue 
+
+private static void ProcessNoClip()
+{
+    bool flag = false;
+    List<InputDevice> list = new List<InputDevice>();
+    InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.HeldInHand | InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.Right, list);
+    list[0].TryGetFeatureValue(CommonUsages.triggerButton, out flag);
+    if (flag)
+    {
+        if (!BwueMenu.flag2)
+        {
+            foreach (MeshCollider meshCollider in Resources.FindObjectsOfTypeAll<MeshCollider>())
+            {
+                meshCollider.transform.localScale = meshCollider.transform.localScale / 10000f;
+            }
+            BwueMenu.flag2 = true;
+            BwueMenu.flag1 = false;
+            return;
+        }
+    }
+    else if (!BwueMenu.flag1)
+    {
+        foreach (MeshCollider meshCollider2 in Resources.FindObjectsOfTypeAll<MeshCollider>())
+        {
+            meshCollider2.transform.localScale = meshCollider2.transform.localScale * 10000f;
+        }
+        BwueMenu.flag1 = true;
+        BwueMenu.flag2 = false;
+    }
+}
+__ unlock comp
+bwue
+
+
+private static void UnlockComp()
+{
+    PlayerPrefs.SetInt("allowedInCompetitive", 1);
+    PlayerPrefs.Save();
+}
+VibinFishy — 01/31/2023 7:12 PM
+Image
+VibinFishy — 02/05/2023 10:54 AM
+public static void WASDMove()
+{
+    Player.Instance.leftHandTransform.position = Player.Instance.headCollider.transform.position;
+    Player.Instance.rightHandTransform.position = Player.Instance.headCollider.transform.position;
+    bool flag = false;
+    int num = 0;
+    bool key = UnityInput.Current.GetKey(KeyCode.LeftShift);
+    float d;
+    float d2;
+    if (key)
+    {
+        d = 20f;
+        d2 = -20f;
+    }
+    else
+    {
+        d = 2f;
+        d2 = -2f;
+    }
+    bool key2 = UnityInput.Current.GetKey(KeyCode.Space);
+    if (key2)
+    {
+        flag = true;
+    }
+    bool key3 = UnityInput.Current.GetKey(KeyCode.W);
+    if (key3)
+    {
+        Player.Instance.transform.position += Player.Instance.bodyCollider.transform.forward * Time.deltaTime * d;
+    }
+    bool key4 = UnityInput.Current.GetKey(KeyCode.S);
+    if (key4)
+    {
+        Player.Instance.transform.position += Player.Instance.bodyCollider.transform.forward * Time.deltaTime * d2;
+    }
+    bool key5 = UnityInput.Current.GetKey(KeyCode.A);
+    if (key5)
+    {
+        Player.Instance.transform.Rotate(0f, -1f, 0f);
+    }
+    bool key6 = UnityInput.Current.GetKey(KeyCode.D);
+    if (key6)
+    {
+        Player.Instance.transform.Rotate(0f, 1f, 0f);
+    }
+    while (flag)
+    {
+        num++;
+        Player.Instance.GetComponent<Rigidbody>().AddForce(0f, 5f, 0f, ForceMode.Impulse);
+        flag = false;
+    }
+}
+public static void NoClip()
+{
+    bool righttriggerDown = MainMenu.righttriggerDown;
+    if (righttriggerDown)
+    {
+        bool flag = !MainMenu.hasCompletedNoClip;
+        if (flag)
+        {
+            foreach (MeshCollider meshCollider in Resources.FindObjectsOfTypeAll<MeshCollider>())
+            {
+                meshCollider.transform.localScale = meshCollider.transform.localScale / 10000f;
+            }
+            MainMenu.hasCompletedNoClip = true;
+        }
+    }
+    else
+    {
+        bool hasCompletedNoClip = MainMenu.hasCompletedNoClip;
+        if (hasCompletedNoClip)
+        {
+            foreach (MeshCollider meshCollider2 in Resources.FindObjectsOfTypeAll<MeshCollider>())
+            {
+                meshCollider2.transform.localScale = meshCollider2.transform.localScale * 10000f;
+            }
+            MainMenu.hasCompletedNoClip = false;
+        }
+    }
+}
+VibinFishy — 02/08/2023 9:34 PM
+PhotonNetwork.Disconnect();
+lol
+private static void cactussoundspam()
+{
+    foreach (Player player in PhotonNetwork.PlayerList)
+    {
+        PhotonView photonView = GorillaGameManager.instance.FindVRRigForPlayer(player);
+        if (photonView != null)
+        {
+            photonView.RPC("PlayHandTap", 0, new object[]
+            {
+                27,
+                true,
+                1f
+            });
+        }
+    }
+}
+detectable master:
+
+public static void master()
+{
+    foreach (GorillaNot gorillaNot in UnityEngine.Object.FindObjectsOfType<GorillaNot>())
+    {
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            PhotonNetwork.SetMasterClient(PhotonNetwork.LocalPlayer);
+        }
+        if (!gorillaNot.photonView.IsMine)
+        {
+            gorillaNot.photonView.RequestOwnership();
+        }
+        PhotonNetwork.Destroy(gorillaNot.photonView);
+        UnityEngine.Object.Destroy(gorillaNot.gameObject);
+        PhotonNetwork.SendAllOutgoingCommands();
+    }
+}
+public static void HeadSpin()
+{
+    bool inRoom = PhotonNetwork.InRoom;
+    bool flag = inRoom;
+    if (flag)
+    {
+        VRMap head = GorillaTagger.Instance.myVRRig.head;
+        head.trackingRotationOffset.y = head.trackingRotationOffset.y + 15f;
+    }
+    else
+    {
+        VRMap head2 = GorillaTagger.Instance.offlineVRRig.head;
+        head2.trackingRotationOffset.y = head2.trackingRotationOffset.y + 15f;
+    }
+}
+VibinFishy — 02/08/2023 9:49 PM
+bool invisButton;
+            InputDevices.GetDeviceAtXRNode(XRNode.LeftHand).TryGetFeatureValue(CommonUsages.triggerButton, out invisButton);
+
+            if (invisButton)
+            {
+                GorillaTagger.Instance.myVRRig.enabled = false;
+                GorillaTagger.Instance.myVRRig.transform.position = new Vector3(100, 0, 100);
+            }
+            else if (!invisButton)
+            {
+                GorillaTagger.Instance.myVRRig.enabled = true;
+            }
+bool primaryDown = false;
+            bool secondaryDown = false;
+            bool nograv = false;
+            bool debounce = false;
+            GorillaLocomotion.Player player = GorillaLocomotion.Player.Instance;
+            InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(CommonUsages.primaryButton, out primaryDown);
+            InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(CommonUsages.secondaryButton, out secondaryDown);
+
+            Vector3 righthandthing = player.rightHandTransform.position - player.bodyCollider.transform.position;
+
+            if (primaryDown) 
+            {
+                player.GetComponent<Rigidbody>().useGravity = false;
+                player.GetComponent<Rigidbody>().velocity = (righthandthing / 2) * 54;
+            }
+            else 
+            {
+                player.GetComponent<Rigidbody>().useGravity = true;
+            }
+rist fly
+VibinFishy — 02/08/2023 11:21 PM
+Tag-Sound-Spam
+public static void SoundSpammer()
+{
+    VRRig[] allVRRigs = GTAGMenu.GetAllVRRigs();
+    for (int i = 0; i < allVRRigs.Length; i++)
+    {
+        allVRRigs[i].photonView.RPC("PlayTagSound", 0, new object[]
+        {
+            2,
+            90f
+        });
+    }
+}
+
+
+GetAllVRRigs (you need this for the sound spammer)
+private static VRRig[] GetAllVRRigs()
+{
+    return UnityEngine.Object.FindObjectsOfType<VRRig>();
+}
+
+The sound spammer is detected so be careful!
+Btw its IHAVEADILDOUPMYASS's code (He's from gorilla buddies).
+Ghost Monke
+{
+                    bool flag5 = false;
+                    list = new List<InputDevice>();
+                    InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.HeldInHand | InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.Left, list);
+                    list[0].TryGetFeatureValue(CommonUsages.primaryButton, out flag5);
+                    if (flag5)
+                    {
+                        if (!GTAGMenu.ghostToggled && GorillaTagger.Instance.myVRRig.enabled)
+                        {
+                            GorillaTagger.Instance.myVRRig.enabled = false;
+                            GTAGMenu.ghostToggled = true;
+                        }
+                        else if (!GTAGMenu.ghostToggled && !GorillaTagger.Instance.myVRRig.enabled)
+                        {
+                            GorillaTagger.Instance.myVRRig.enabled = true;
+                            GTAGMenu.ghostToggled = true;
+                        }
+                    }
+                    else
+                    {
+                        GTAGMenu.ghostToggled = false;
+                    }
+                }
+
+This ghost monke, is most likely undetected.
+VibinFishy — 02/13/2023 10:20 PM
+speed boos
+Attachment file type: unknown
+pp.dll
+356 bytes
+t
+VibinFishy — 02/14/2023 7:23 PM
+PhotonNetwork.JoinRandomRoom();
+joinrandomroom.txt
+1 KB
+{
+					if (!ShibaGTMenu.Start)
+					{
+						ShibaGTMenu.multiplier = 3f;
+						ShibaGTMenu.Start = true;
+					}
+Expand
+car.txt
+3 KB
+Application.Quit();
+quit_game.txt
+1 KB
+{
+	bool flag = false;
+	bool flag2 = false;
+	List<InputDevice> list = new List<InputDevice>();
+	InputDevices.GetDevices(list);
+	InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.HeldInHand | InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.Right, list);
+Expand
+tpgun.txt
+2 KB
+{
+					if (!ShibaGTMenu.DoOnce)
+					{
+						ShibaGTMenu.max = new ConfigFile(Path.Combine(Paths.ConfigPath, "WallWalking.cfg"), true).Bind<float>("Configuration", "MaxDistance", 2f, "The max distance you can be from a wall before you go down");
+						ShibaGTMenu.maxD = ShibaGTMenu.max.Value;
+						ShibaGTMenu.layers = 512;
+Expand
+wallwalk.txt
+2 KB
+VibinFishy — 02/14/2023 10:13 PM
+sing UnityEngine;
+using UnityEngine.InputSystem;
+
+[RequireComponent(typeof(Rigidbody))]
+
+public class swimmer : MonoBehaviour
+{
+    [Header("Values")]
+    [SerializeField] float swimForce = 2f;
+    [SerializeField] float dragForce = 1f;
+    [SerializeField] float minForce;
+    [SerializeField] float minTimeBetweenStrokes;
+
+    [SerializeField] InputActionReference leftControllerSwimReference;
+    [SerializeField] InputActionReference leftControllerVelocity;
+    [SerializeField] InputActionReference rightControllerSwimReference;
+    [SerializeField] InputActionReference rightControllerVelocity;
+    [SerializeField] Transfrom forwardReference;
+
+    Rigidbody _rigidbody;
+    float _cooldownTimer;
+
+
+    void Awake()
+    {
+        _rigidbody = GetComponent<_rigidbody>();
+        _rigidbody.useGravity = false;
+        _rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
+    }
+
+    void FixedUpdates()
+    {
+        _cooldownTimer += minTimeBetweenStrokes.fixedDeltaTime;
+        if (_cooldownTimer > minTimeBetweenStrokes)
+            && leftControllerSwimReference.action.IsPressed()
+            && rightControllerSwimReference.action.IsPressed()
+        {
+            var leftHandVelocity = leftControllerVelocity.action.Readvalue<Vector3>();
+            var rightHandVelocity = rightControllerVelocity.action.Readvalue<Vector3>();
+            Vector3 localVelocity = leftHandVelocity + rightHandVelocity;
+            localVelocity = -1;
+
+            if (localVelocity.sqrMagnitude > minForce minForce)
+            {
+                Vector3 worldVelocity = trackingRefernce.TransformDirection(localVelocity);
+                _rigidbody.AddForce(worldVelocity * swimForce, ForceMode.Acceleration);
+                _cooldownTimer = Of;
+            }
+        }
+
+        if (_rigidbody.velocity.sqrMagnitude > 0.01f)
+        {
+            _rigidbody.AddForce(-_rigidbody.velocity * dragForce, ForceMode.Acceleration);
+        }
