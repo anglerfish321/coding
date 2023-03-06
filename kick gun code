@@ -1,0 +1,44 @@
+{
+    bool flag = false;
+    bool flag2 = false;
+    List<InputDevice> list = new List<InputDevice>();
+    InputDevices.GetDevices(list);
+    InputDevices.GetDevicesWithCharacteristics(580, list);
+    list[0].TryGetFeatureValue(CommonUsages.triggerButton, ref flag);
+    list[0].TryGetFeatureValue(CommonUsages.gripButton, ref flag2);
+    if (flag2)
+    {
+        RaycastHit raycastHit;
+        Physics.Raycast(Player.Instance.rightHandTransform.position - Player.Instance.rightHandTransform.up, -Player.Instance.rightHandTransform.up, ref raycastHit);
+        if (MenuMods.pointer == null)
+        {
+            MenuMods.pointer = GameObject.CreatePrimitive(0);
+            Object.Destroy(MenuMods.pointer.GetComponent<Rigidbody>());
+            Object.Destroy(MenuMods.pointer.GetComponent<SphereCollider>());
+            MenuMods.pointer.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+        }
+        MenuMods.pointer.transform.position = raycastHit.point;
+        new Color(0f, 0f, 0f);
+        PhotonView componentInParent = raycastHit.collider.GetComponentInParent<PhotonView>();
+        if (componentInParent != null && PhotonNetwork.LocalPlayer != componentInParent.Owner)
+        {
+            GorillaTagger.Instance.StartVibration(true, GorillaTagger.Instance.tagHapticStrength, GorillaTagger.Instance.tagHapticDuration);
+            GorillaTagger.Instance.StartVibration(false, GorillaTagger.Instance.tagHapticStrength, GorillaTagger.Instance.tagHapticDuration);
+            Player player = componentInParent.Owner;
+            if (flag)
+            {
+                GorillaTagger.Instance.myVRRig.transform.position = new Vector3(-68.8629f, 9.1253f, -82.9076f);
+                GorillaTagger.Instance.myVRRig.enabled = false;
+                MenuMods.pointer.GetComponent<Renderer>().material.SetColor("_Color", Color.red);
+                GorillaGameManager.instance.photonView.RPC("JoinPubWithFreinds", player, Array.Empty<object>());
+                return;
+            }
+        }
+    }
+    else
+    {
+        GorillaTagger.Instance.myVRRig.enabled = true;
+        Object.Destroy(MenuMods.pointer);
+        MenuMods.pointer = null;
+    }
+}
