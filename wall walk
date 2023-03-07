@@ -1,0 +1,43 @@
+private static void WallWalking(bool enable)
+{
+	if (!enable)
+	{
+		if (MenuPatch.disablegravityonce && !enable)
+		{
+			GorillaTagger.Instance.bodyCollider.attachedRigidbody.useGravity = true;
+			MenuPatch.disablegravityonce = false;
+		}
+		return;
+	}
+	MenuPatch.disablegravityonce = true;
+	if (!MenuPatch.DoOnce)
+	{
+		MenuPatch.maxD = 2.3f;
+		MenuPatch.layers = 512;
+		MenuPatch.DoOnce = true;
+	}
+	RaycastHit raycastHit;
+	Physics.Raycast(GorillaTagger.Instance.rightHandTransform.position, -GorillaTagger.Instance.rightHandTransform.right, out raycastHit, 100f, MenuPatch.layers);
+	RaycastHit raycastHit2;
+	Physics.Raycast(GorillaTagger.Instance.leftHandTransform.position, GorillaTagger.Instance.leftHandTransform.right, out raycastHit2, 100f, MenuPatch.layers);
+	if (raycastHit2.distance > raycastHit.distance)
+	{
+		MenuPatch.normal = raycastHit.normal;
+		MenuPatch.dist = raycastHit.distance;
+		MenuPatch.LeftClose = false;
+	}
+	else
+	{
+		MenuPatch.normal = raycastHit2.normal;
+		MenuPatch.dist = raycastHit2.distance;
+		MenuPatch.LeftClose = true;
+	}
+	if (MenuPatch.dist < MenuPatch.maxD)
+	{
+		GorillaTagger.Instance.bodyCollider.attachedRigidbody.useGravity = false;
+		MenuPatch.vel = MenuPatch.normal * (9.8f * Time.deltaTime);
+		GorillaTagger.Instance.bodyCollider.attachedRigidbody.velocity -= MenuPatch.vel;
+		return;
+	}
+	GorillaTagger.Instance.bodyCollider.attachedRigidbody.useGravity = true;
+}
